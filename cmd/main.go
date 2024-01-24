@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,10 +10,6 @@ import (
 )
 
 var Cclient gonextcloud.Client
-
-const Cclienturl = "https://storagebox.dentai.org"
-
-var ShareLinkNotFoundLinkErr error = errors.New("share link not found")
 
 func main() {
 
