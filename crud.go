@@ -58,7 +58,7 @@ func (Cclient *CloudClient) GetOrCreateShareLink(
 	if errors.Is(err, ShareLinkNotFoundLinkErr) {
 
 		file, err = cclient.Shares().
-			Create("./Storage-Share.png", gonextcloud.PublicLinkShare, gonextcloud.ReadPermission, "", false, "")
+			Create("./"+filename, gonextcloud.PublicLinkShare, gonextcloud.ReadPermission, "", false, "")
 
 		if err != nil {
 			fmt.Println(err)
