@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	gonextcloud "github.com/uussoop/nxtcloudgo"
 )
 
@@ -21,12 +22,12 @@ var cclient gonextcloud.Client
 func GetClient(url, user, pass string) (*CloudClient, error) {
 	client, err := gonextcloud.NewClient(url)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Error(err)
 		return nil, err
 	}
 	err = client.Login(user, pass)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Error(err)
 		return nil, err
 	}
 	cclient = client
@@ -46,26 +47,24 @@ func (Cclient *CloudClient) RemoveShareLink(shareid int) {
 }
 
 func (Cclient *CloudClient) GetOrCreateShareLink(
-	filename string,
+	path string,
 ) (string, *gonextcloud.Share, error) {
-	name := strings.Split(filename, "/")
-	filename = name[len(name)-1]
+	name := strings.Split(path, "/")
+	filename := name[len(name)-1]
 	file, err := Cclient.CheckIfShared(filename)
 	if err != nil && !errors.Is(err, ShareLinkNotFoundLinkErr) {
-		fmt.Println(err)
+		logrus.Error(err)
 		return "", nil, err
 	}
 	if errors.Is(err, ShareLinkNotFoundLinkErr) {
 
-		file, err = cclient.Shares().
-			Create("./"+filename, gonextcloud.PublicLinkShare, gonextcloud.ReadPermission, "", false, "")
+		file, err = cclient.Shares().Create(path, gonextcloud.PublicLinkShare, gonextcloud.ReadPermission, "", false, "")
 
 		if err != nil {
-			fmt.Println(err)
+			logrus.Error(err)
 
 		}
 
-		fmt.Println(file.Token)
 	}
 	shareUrl := fmt.Sprintf("%s/s/%s/download/%s", Cclient.url, file.Token, filename)
 
@@ -75,8 +74,9 @@ func (Cclient *CloudClient) GetOrCreateShareLink(
 
 func (Cclient *CloudClient) CheckIfShared(name string) (gonextcloud.Share, error) {
 	sharedlist, err := cclient.Shares().List()
+
 	if err != nil {
-		fmt.Println(err)
+		logrus.Error(err)
 		return gonextcloud.Share{}, err
 	}
 	for _, share := range sharedlist {
